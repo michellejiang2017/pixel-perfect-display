@@ -113,7 +113,7 @@ export function explainCommunity(me: MyProfile, community: Community): string[] 
     lines.push(`Several of you are looking for the same thing: ${list(community.sharedGoals.map((g) => g.toLowerCase())).replace("people outside their usual social circle", "people outside your usual circles")}.`);
   }
   if (community.sharedAvailability.length) {
-    lines.push(`Your free time lines up around ${list(community.sharedAvailability.map((a) => a.toLowerCase()))}.`);
+    lines.push(`Your free time lines up around ${list(community.sharedAvailability as string[])}.`);
   }
   if (community.sharedInterests.length) {
     lines.push(`You share interests in ${list(community.sharedInterests.map((i) => i.toLowerCase()))}.`);
