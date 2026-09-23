@@ -1,0 +1,126 @@
+/**
+ * Synthetic student dataset for the Worlds Together prototype.
+ * Edit freely — this is the only source of fictional students.
+ */
+
+export type SocialGoal =
+  | "Close friendships"
+  | "Casual friends"
+  | "People to explore with"
+  | "Study buddies"
+  | "Cultural connection"
+  | "People outside their usual social circle";
+
+export type Availability =
+  | "Weekday mornings"
+  | "Weekday afternoons"
+  | "Weekday evenings"
+  | "Saturday afternoons"
+  | "Saturday evenings"
+  | "Sunday afternoons";
+
+/** Information a student agreed to show to their matches. */
+export interface PublicProfile {
+  firstName: string;
+  year: string;
+  region?: string;
+  languages?: string[];
+  interests: string[];
+  activities: string[];
+}
+
+/** Information used only by the matching module. Never rendered on a card. */
+export interface PrivateProfile {
+  availability: Availability[];
+  goals: SocialGoal[];
+  regionForMatching: string;
+  openness: number; // 1 = prefers familiar, 5 = actively wants new circles
+  note?: string; // free-text, always private
+}
+
+export interface Student {
+  id: string;
+  public: PublicProfile;
+  private: PrivateProfile;
+}
+
+const s = (
+  id: string,
+  firstName: string,
+  year: string,
+  region: string,
+  languages: string[],
+  interests: string[],
+  activities: string[],
+  availability: Availability[],
+  goals: SocialGoal[],
+  openness: number,
+): Student => ({
+  id,
+  public: { firstName, year, region, languages, interests, activities },
+  private: { availability, goals, regionForMatching: region, openness },
+});
+
+export const STUDENTS: Student[] = [
+  s("1", "Amara", "First year", "Nigeria", ["English", "Igbo"], ["Food", "Entrepreneurship", "Photography"], ["Cafe hopping", "Weekend markets"], ["Saturday afternoons", "Weekday evenings"], ["People outside their usual social circle", "People to explore with"], 5),
+  s("2", "Ravi", "Second year", "India", ["Hindi", "English"], ["Hiking", "Cricket", "Food"], ["Day hikes", "Cooking together"], ["Saturday afternoons", "Sunday afternoons"], ["Casual friends", "People to explore with"], 4),
+  s("3", "Sofia", "Third year", "Brazil", ["Portuguese", "Spanish", "English"], ["Dance", "Film", "Food"], ["Film nights", "Cafe hopping"], ["Weekday evenings", "Saturday evenings"], ["Close friendships", "Cultural connection"], 4),
+  s("4", "Minji", "First year", "South Korea", ["Korean", "English"], ["Study groups", "Baking", "K-pop"], ["Library sessions", "Baking afternoons"], ["Weekday afternoons", "Sunday afternoons"], ["Study buddies", "Casual friends"], 3),
+  s("5", "Tomas", "Fourth year", "Czech Republic", ["Czech", "German", "English"], ["Cycling", "Chess", "Entrepreneurship"], ["Bike rides", "Startup meetups"], ["Saturday afternoons", "Weekday mornings"], ["People outside their usual social circle", "Study buddies"], 5),
+  s("6", "Leila", "Second year", "Lebanon", ["Arabic", "French", "English"], ["Food", "Poetry", "Volunteering"], ["Cooking together", "Community volunteering"], ["Saturday afternoons", "Weekday evenings"], ["Cultural connection", "Close friendships"], 4),
+  s("7", "Kenji", "Third year", "Japan", ["Japanese", "English"], ["Photography", "Hiking", "Board games"], ["Day hikes", "Photo walks"], ["Saturday afternoons", "Sunday afternoons"], ["People to explore with", "Casual friends"], 4),
+  s("8", "Nour", "First year", "Egypt", ["Arabic", "English"], ["Entrepreneurship", "Debate", "Food"], ["Startup meetups", "Weekend markets"], ["Weekday evenings", "Saturday afternoons"], ["People outside their usual social circle", "Study buddies"], 5),
+  s("9", "Elena", "Second year", "Spain", ["Spanish", "English"], ["Running", "Art", "Food"], ["Morning runs", "Museum visits"], ["Weekday mornings", "Saturday afternoons"], ["Casual friends", "People to explore with"], 3),
+  s("10", "Daniel", "Fourth year", "Ghana", ["English", "Twi"], ["Music", "Basketball", "Entrepreneurship"], ["Jam sessions", "Pickup games"], ["Weekday evenings", "Saturday evenings"], ["Close friendships", "Cultural connection"], 4),
+  s("11", "Ana", "Third year", "Mexico", ["Spanish", "English"], ["Food", "Hiking", "Ceramics"], ["Cooking together", "Day hikes"], ["Saturday afternoons", "Sunday afternoons"], ["People to explore with", "Close friendships"], 4),
+  s("12", "Wei", "First year", "China", ["Mandarin", "English"], ["Study groups", "Badminton", "Food"], ["Library sessions", "Weekend markets"], ["Weekday afternoons", "Saturday afternoons"], ["Study buddies", "Casual friends"], 3),
+  s("13", "Fatima", "Second year", "Pakistan", ["Urdu", "English"], ["Writing", "Volunteering", "Tea culture"], ["Cafe hopping", "Community volunteering"], ["Weekday afternoons", "Sunday afternoons"], ["Cultural connection", "Close friendships"], 3),
+  s("14", "Lukas", "Third year", "Germany", ["German", "English"], ["Cycling", "Climbing", "Film"], ["Bike rides", "Climbing gym"], ["Saturday afternoons", "Weekday evenings"], ["People outside their usual social circle", "People to explore with"], 5),
+  s("15", "Priya", "Fourth year", "India", ["Tamil", "English"], ["Entrepreneurship", "Yoga", "Food"], ["Startup meetups", "Morning walks"], ["Weekday mornings", "Saturday afternoons"], ["Study buddies", "People outside their usual social circle"], 4),
+  s("16", "Camille", "Second year", "France", ["French", "English"], ["Art", "Film", "Baking"], ["Museum visits", "Film nights"], ["Weekday evenings", "Sunday afternoons"], ["Close friendships", "Casual friends"], 3),
+  s("17", "Yusuf", "First year", "Turkey", ["Turkish", "English"], ["Football", "Food", "Photography"], ["Pickup games", "Photo walks"], ["Saturday afternoons", "Saturday evenings"], ["Casual friends", "Cultural connection"], 4),
+  s("18", "Thandi", "Third year", "South Africa", ["English", "Zulu"], ["Hiking", "Entrepreneurship", "Music"], ["Day hikes", "Jam sessions"], ["Saturday afternoons", "Weekday evenings"], ["People outside their usual social circle", "People to explore with"], 5),
+  s("19", "Marta", "First year", "Poland", ["Polish", "English"], ["Swimming", "Baking", "Board games"], ["Baking afternoons", "Game nights"], ["Weekday afternoons", "Sunday afternoons"], ["Casual friends", "Study buddies"], 3),
+  s("20", "Ibrahim", "Fourth year", "Indonesia", ["Indonesian", "English"], ["Food", "Coding", "Badminton"], ["Cooking together", "Hack nights"], ["Weekday evenings", "Saturday afternoons"], ["Study buddies", "Cultural connection"], 4),
+  s("21", "Giulia", "Second year", "Italy", ["Italian", "English"], ["Food", "Running", "Poetry"], ["Cafe hopping", "Morning runs"], ["Weekday mornings", "Saturday afternoons"], ["Close friendships", "People to explore with"], 4),
+  s("22", "Hoang", "Third year", "Vietnam", ["Vietnamese", "English"], ["Photography", "Street food", "Cycling"], ["Photo walks", "Weekend markets"], ["Saturday afternoons", "Sunday afternoons"], ["People to explore with", "People outside their usual social circle"], 5),
+  s("23", "Zoe", "First year", "Greece", ["Greek", "English"], ["Theatre", "Food", "Volunteering"], ["Film nights", "Community volunteering"], ["Weekday evenings", "Saturday evenings"], ["Casual friends", "Cultural connection"], 4),
+  s("24", "Omar", "Second year", "Jordan", ["Arabic", "English"], ["Chess", "Entrepreneurship", "Hiking"], ["Startup meetups", "Day hikes"], ["Saturday afternoons", "Weekday mornings"], ["Study buddies", "People outside their usual social circle"], 4),
+  s("25", "Line", "Third year", "Denmark", ["Danish", "English"], ["Cycling", "Ceramics", "Coffee"], ["Bike rides", "Cafe hopping"], ["Weekday afternoons", "Saturday afternoons"], ["Casual friends", "Close friendships"], 3),
+  s("26", "Mateo", "Fourth year", "Colombia", ["Spanish", "English"], ["Dance", "Football", "Food"], ["Pickup games", "Cooking together"], ["Saturday evenings", "Sunday afternoons"], ["Close friendships", "Cultural connection"], 4),
+  s("27", "Aisha", "First year", "Kenya", ["Swahili", "English"], ["Running", "Entrepreneurship", "Food"], ["Morning runs", "Weekend markets"], ["Weekday mornings", "Saturday afternoons"], ["People outside their usual social circle", "Study buddies"], 5),
+  s("28", "Nikolai", "Second year", "Kazakhstan", ["Russian", "Kazakh", "English"], ["Climbing", "Coding", "Board games"], ["Climbing gym", "Hack nights"], ["Weekday evenings", "Saturday afternoons"], ["Casual friends", "People to explore with"], 4),
+  s("29", "Hana", "Third year", "Morocco", ["Arabic", "French", "English"], ["Food", "Art", "Hiking"], ["Cooking together", "Museum visits"], ["Saturday afternoons", "Sunday afternoons"], ["Cultural connection", "People to explore with"], 4),
+  s("30", "Erik", "First year", "Sweden", ["Swedish", "English"], ["Hiking", "Photography", "Entrepreneurship"], ["Day hikes", "Photo walks"], ["Saturday afternoons", "Weekday evenings"], ["People outside their usual social circle", "Close friendships"], 5),
+];
+
+export const YEARS = ["First year", "Second year", "Third year", "Fourth year", "Graduate"];
+
+export const INTEREST_OPTIONS = [
+  "Food", "Hiking", "Entrepreneurship", "Photography", "Music", "Film", "Art",
+  "Running", "Cycling", "Climbing", "Dance", "Board games", "Coding", "Volunteering",
+  "Study groups", "Baking", "Poetry", "Football", "Theatre",
+];
+
+export const ACTIVITY_OPTIONS = [
+  "Cafe hopping", "Day hikes", "Cooking together", "Weekend markets", "Film nights",
+  "Library sessions", "Startup meetups", "Photo walks", "Bike rides", "Morning runs",
+  "Museum visits", "Pickup games", "Jam sessions", "Community volunteering",
+  "Game nights", "Baking afternoons", "Climbing gym", "Hack nights", "Morning walks",
+];
+
+export const LANGUAGE_OPTIONS = [
+  "English", "Mandarin", "Spanish", "Hindi", "Arabic", "French", "Portuguese",
+  "Korean", "Japanese", "German", "Italian", "Swahili", "Russian", "Turkish",
+  "Vietnamese", "Urdu", "Polish", "Indonesian", "Greek", "Danish", "Swedish",
+];
+
+export const AVAILABILITY_OPTIONS: Availability[] = [
+  "Weekday mornings", "Weekday afternoons", "Weekday evenings",
+  "Saturday afternoons", "Saturday evenings", "Sunday afternoons",
+];
+
+export const GOAL_OPTIONS: SocialGoal[] = [
+  "Close friendships", "Casual friends", "People to explore with",
+  "Study buddies", "Cultural connection", "People outside their usual social circle",
+];
