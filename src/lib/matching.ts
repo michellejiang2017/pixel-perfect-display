@@ -23,7 +23,7 @@ export interface MyProfile {
   shareLanguages: boolean;
 }
 
-const overlap = <T,>(a: T[], b: T[]) => a.filter((x) => b.includes(x));
+const overlap = <T>(a: T[], b: T[]) => a.filter((x) => b.includes(x));
 
 const WEIGHTS = {
   interests: 3,
@@ -88,15 +88,27 @@ export function buildCommunity(me: MyProfile, pool: Student[] = []): Community {
     if (!members.includes(student)) members.push(student);
   }
 
-  const countCommon = <T,>(values: T[][], mine: T[]) =>
+  const countCommon = <T>(values: T[][], mine: T[]) =>
     mine.filter((v) => values.filter((list) => list.includes(v)).length >= 2);
 
   return {
     members,
-    sharedInterests: countCommon(members.map((m) => m.public.interests), me.interests),
-    sharedActivities: countCommon(members.map((m) => m.public.activities), me.activities),
-    sharedAvailability: countCommon(members.map((m) => m.private.availability), me.availability),
-    sharedGoals: countCommon(members.map((m) => m.private.goals), me.goals),
+    sharedInterests: countCommon(
+      members.map((m) => m.public.interests),
+      me.interests,
+    ),
+    sharedActivities: countCommon(
+      members.map((m) => m.public.activities),
+      me.activities,
+    ),
+    sharedAvailability: countCommon(
+      members.map((m) => m.private.availability),
+      me.availability,
+    ),
+    sharedGoals: countCommon(
+      members.map((m) => m.private.goals),
+      me.goals,
+    ),
     regionCount: new Set([me.region, ...members.map((m) => m.private.regionForMatching)]).size,
   };
 }
@@ -110,23 +122,34 @@ const list = (items: string[]) =>
 export function explainCommunity(me: MyProfile, community: Community): string[] {
   const lines: string[] = [];
   if (community.sharedGoals.length) {
-    lines.push(`Several of you are looking for the same thing: ${list(community.sharedGoals.map((g) => g.toLowerCase())).replace("people outside their usual social circle", "people outside your usual circles")}.`);
+    lines.push(
+      `Several of you are looking for the same thing: ${list(community.sharedGoals.map((g) => g.toLowerCase())).replace("people outside their usual social circle", "people outside your usual circles")}.`,
+    );
   }
   if (community.sharedAvailability.length) {
     lines.push(`Your free time lines up around ${list(community.sharedAvailability as string[])}.`);
   }
   if (community.sharedInterests.length) {
-    lines.push(`You share interests in ${list(community.sharedInterests.map((i) => i.toLowerCase()))}.`);
+    lines.push(
+      `You share interests in ${list(community.sharedInterests.map((i) => i.toLowerCase()))}.`,
+    );
   }
   if (community.sharedActivities.length) {
-    lines.push(`You all said you'd like to try ${list(community.sharedActivities.map((a) => a.toLowerCase()))}.`);
+    lines.push(
+      `You all said you'd like to try ${list(community.sharedActivities.map((a) => a.toLowerCase()))}.`,
+    );
   }
-  lines.push(`The group spans ${community.regionCount} different home countries or regions, so it isn't just people from one background.`);
+  lines.push(
+    `The group spans ${community.regionCount} different home countries or regions, so it isn't just people from one background.`,
+  );
   return lines;
 }
 
 /** One concrete first meet-up from overlapping interests and availability. */
-export function suggestActivity(me: MyProfile, community: Community): { when: string; what: string } {
+export function suggestActivity(
+  me: MyProfile,
+  community: Community,
+): { when: string; what: string } {
   const when = community.sharedAvailability[0] ?? me.availability[0] ?? "Saturday afternoons";
   const activity = community.sharedActivities[0] ?? me.activities[0] ?? "Cafe hopping";
   const map: Record<string, string> = {

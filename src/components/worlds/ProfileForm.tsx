@@ -71,7 +71,9 @@ export function ProfileForm({ onSubmit }: { onSubmit: (profile: MyProfile) => vo
           }
         >
           <div className="space-y-2">
-            <label className="text-sm font-medium" htmlFor="firstName">First name</label>
+            <label className="text-sm font-medium" htmlFor="firstName">
+              First name
+            </label>
             <input
               id="firstName"
               className="field"
@@ -84,12 +86,18 @@ export function ProfileForm({ onSubmit }: { onSubmit: (profile: MyProfile) => vo
 
           <div className="space-y-2">
             <span className="text-sm font-medium">Year in school</span>
-            <ChipGroup options={YEARS} selected={p.year ? [p.year] : []} onToggle={(y) => set("year", y)} />
+            <ChipGroup
+              options={YEARS}
+              selected={p.year ? [p.year] : []}
+              onToggle={(y) => set("year", y)}
+            />
             <VisibilityNote kind="public" />
           </div>
 
           <div className="space-y-2">
-            <label className="text-sm font-medium" htmlFor="region">Home country or region</label>
+            <label className="text-sm font-medium" htmlFor="region">
+              Home country or region
+            </label>
             <input
               id="region"
               className="field"
@@ -111,7 +119,11 @@ export function ProfileForm({ onSubmit }: { onSubmit: (profile: MyProfile) => vo
 
           <div className="space-y-2">
             <span className="text-sm font-medium">Languages you speak</span>
-            <ChipGroup options={LANGUAGE_OPTIONS} selected={p.languages} onToggle={(v) => toggle("languages", v)} />
+            <ChipGroup
+              options={LANGUAGE_OPTIONS}
+              selected={p.languages}
+              onToggle={(v) => toggle("languages", v)}
+            />
             <label className="mt-1 flex items-start gap-2 text-sm text-muted-foreground">
               <input
                 type="checkbox"
@@ -133,7 +145,9 @@ export function ProfileForm({ onSubmit }: { onSubmit: (profile: MyProfile) => vo
           description="Pick a handful. Overlap is what makes a first meet-up easy."
           footer={
             <>
-              <button className="btn-quiet" onClick={() => setStep(1)}>Back</button>
+              <button className="btn-quiet" onClick={() => setStep(1)}>
+                Back
+              </button>
               <button className="btn-primary" disabled={!canContinue} onClick={() => setStep(3)}>
                 Continue
               </button>
@@ -142,12 +156,20 @@ export function ProfileForm({ onSubmit }: { onSubmit: (profile: MyProfile) => vo
         >
           <div className="space-y-2">
             <span className="text-sm font-medium">Interests</span>
-            <ChipGroup options={INTEREST_OPTIONS} selected={p.interests} onToggle={(v) => toggle("interests", v)} />
+            <ChipGroup
+              options={INTEREST_OPTIONS}
+              selected={p.interests}
+              onToggle={(v) => toggle("interests", v)}
+            />
             <VisibilityNote kind="public" />
           </div>
           <div className="space-y-2">
             <span className="text-sm font-medium">Things you'd like to do with other people</span>
-            <ChipGroup options={ACTIVITY_OPTIONS} selected={p.activities} onToggle={(v) => toggle("activities", v)} />
+            <ChipGroup
+              options={ACTIVITY_OPTIONS}
+              selected={p.activities}
+              onToggle={(v) => toggle("activities", v)}
+            />
             <VisibilityNote kind="public" />
           </div>
         </StepShell>
@@ -160,7 +182,9 @@ export function ProfileForm({ onSubmit }: { onSubmit: (profile: MyProfile) => vo
           description="This part stays private — it only shapes who you're grouped with."
           footer={
             <>
-              <button className="btn-quiet" onClick={() => setStep(2)}>Back</button>
+              <button className="btn-quiet" onClick={() => setStep(2)}>
+                Back
+              </button>
               <button className="btn-primary" disabled={!canContinue} onClick={() => setStep(4)}>
                 Continue
               </button>
@@ -174,7 +198,9 @@ export function ProfileForm({ onSubmit }: { onSubmit: (profile: MyProfile) => vo
               selected={p.availability}
               onToggle={(v: Availability) => toggle("availability", v)}
             />
-            <VisibilityNote kind="private">Matches see a suggested time, never your full schedule.</VisibilityNote>
+            <VisibilityNote kind="private">
+              Matches see a suggested time, never your full schedule.
+            </VisibilityNote>
           </div>
           <div className="space-y-2">
             <span className="text-sm font-medium">What you're looking for</span>
@@ -195,8 +221,12 @@ export function ProfileForm({ onSubmit }: { onSubmit: (profile: MyProfile) => vo
           description="Optional, and private by default."
           footer={
             <>
-              <button className="btn-quiet" onClick={() => setStep(3)}>Back</button>
-              <button className="btn-accent" onClick={() => onSubmit(p)}>Find my community</button>
+              <button className="btn-quiet" onClick={() => setStep(3)}>
+                Back
+              </button>
+              <button className="btn-accent" onClick={() => onSubmit(p)}>
+                Find my community
+              </button>
             </>
           }
         >

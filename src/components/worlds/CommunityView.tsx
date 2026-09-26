@@ -1,11 +1,6 @@
 import { useState } from "react";
 import type { Student } from "@/data/students";
-import {
-  explainCommunity,
-  suggestActivity,
-  type Community,
-  type MyProfile,
-} from "@/lib/matching";
+import { explainCommunity, suggestActivity, type Community, type MyProfile } from "@/lib/matching";
 
 function StudentCard({ student }: { student: Student }) {
   const { firstName, year, region, languages, interests, activities } = student.public;
@@ -28,7 +23,9 @@ function StudentCard({ student }: { student: Student }) {
       ) : null}
       <div className="mt-3 flex flex-wrap gap-1.5">
         {interests.map((i) => (
-          <span key={i} className="tag">{i}</span>
+          <span key={i} className="tag">
+            {i}
+          </span>
         ))}
       </div>
       <p className="mt-4 text-xs text-muted-foreground">Up for: {activities.join(" · ")}</p>
@@ -79,8 +76,8 @@ export function CommunityView({
           ))}
         </ul>
         <p className="mt-5 text-xs text-muted-foreground">
-          Built only from information everyone agreed to share. Private answers shaped the match
-          but are never shown.
+          Built only from information everyone agreed to share. Private answers shaped the match but
+          are never shown.
         </p>
       </section>
 
@@ -96,8 +93,12 @@ export function CommunityView({
         </p>
 
         <div className="mt-6 flex flex-wrap gap-3">
-          <button className="btn-accent" onClick={() => setJoined("in")}>I'd join</button>
-          <button className="btn-quiet" onClick={() => setJoined("out")}>Not for me</button>
+          <button className="btn-accent" onClick={() => setJoined("in")}>
+            I'd join
+          </button>
+          <button className="btn-quiet" onClick={() => setJoined("out")}>
+            Not for me
+          </button>
         </div>
 
         {joined === "in" && (
@@ -130,7 +131,9 @@ export function CommunityView({
             Thanks — that feedback tunes future groups.
           </p>
         ) : null}
-        <button className="btn-quiet mt-6" onClick={onRestart}>Start over</button>
+        <button className="btn-quiet mt-6" onClick={onRestart}>
+          Start over
+        </button>
       </section>
     </div>
   );

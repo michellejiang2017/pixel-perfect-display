@@ -81,7 +81,10 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { name: "description", content: "Community matching for international university students." },
       { name: "author", content: "Lovable" },
       { property: "og:title", content: "Worlds Together" },
-      { property: "og:description", content: "Community matching for international university students." },
+      {
+        property: "og:description",
+        content: "Community matching for international university students.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:site", content: "@Lovable" },

@@ -29,7 +29,13 @@ export function ChipGroup<T extends string>({
   );
 }
 
-export function VisibilityNote({ kind, children }: { kind: "public" | "private"; children?: ReactNode }) {
+export function VisibilityNote({
+  kind,
+  children,
+}: {
+  kind: "public" | "private";
+  children?: ReactNode;
+}) {
   return (
     <div className="flex flex-wrap items-center gap-2">
       <span className={kind === "public" ? "label-public" : "label-private"}>
