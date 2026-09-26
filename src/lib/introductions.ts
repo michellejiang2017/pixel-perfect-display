@@ -1,4 +1,5 @@
 import type { Availability, MyNetworkProfile, NetworkStudent } from "@/data/network";
+import { cosineSimilarity, embedTexts } from "@/lib/localEmbeddings";
 
 const overlap = <T>(left: readonly T[], right: readonly T[]): T[] =>
   left.filter((item) => right.includes(item));
@@ -15,6 +16,9 @@ export interface IntroductionMatch {
   sharedAvailability: Availability[];
   scheduleOverlap: boolean;
   meetingCompatible: boolean;
+  semanticSimilarity?: number;
+  combinedScore?: number;
+  usedLocalAI?: boolean;
 }
 
 export function scoreIntroduction(me: MyNetworkProfile, other: NetworkStudent): IntroductionMatch {
@@ -25,13 +29,14 @@ export function scoreIntroduction(me: MyNetworkProfile, other: NetworkStudent): 
 
   let score = 0;
 
-  // The product is intentionally intercollegiate.
   score += other.public.college !== me.college ? 10 : -12;
-
   score += sharedInterests.length * 4;
   score += sharedGoals.length * 4;
   score += sharedAvailability.length * 3;
-  if (modeWorks) score += 4;
+
+  if (modeWorks) {
+    score += 4;
+  }
 
   return {
     student: other,
@@ -60,6 +65,67 @@ export function rankIntroductions(
     );
 }
 
+function candidateSemanticText(student: NetworkStudent): string {
+  return [
+    student.public.introLine,
+    `Interests: ${student.public.interests.join(", ")}.`,
+    `Connection goals: ${student.private.goals.join(", ")}.`,
+    student.private.context ? `Private matching context: ${student.private.context}` : "",
+  ]
+    .filter(Boolean)
+    .join(" ");
+}
+
+function clamp(value: number, minimum: number, maximum: number): number {
+  return Math.min(maximum, Math.max(minimum, value));
+}
+
+export async function rankIntroductionsWithLocalAI(
+  me: MyNetworkProfile,
+  pool: NetworkStudent[],
+  privateIntent: string,
+): Promise<IntroductionMatch[]> {
+  const baseMatches = rankIntroductions(me, pool);
+  const intent = privateIntent.trim();
+
+  if (!intent) {
+    return baseMatches;
+  }
+
+  const candidateTexts = baseMatches.map((match) => candidateSemanticText(match.student));
+  const [intentVector, ...candidateVectors] = await embedTexts([intent, ...candidateTexts]);
+
+  if (!intentVector) {
+    return baseMatches;
+  }
+
+  return baseMatches
+    .map((match, index) => {
+      const candidateVector = candidateVectors[index];
+
+      if (!candidateVector) {
+        return { ...match, combinedScore: match.score, usedLocalAI: false };
+      }
+
+      const similarity = clamp(cosineSimilarity(intentVector, candidateVector), 0, 1);
+      const ruleScore = clamp(match.score / 40, 0, 1);
+      const combinedScore = ruleScore * 65 + similarity * 35;
+
+      return {
+        ...match,
+        semanticSimilarity: similarity,
+        combinedScore,
+        usedLocalAI: true,
+      };
+    })
+    .sort(
+      (a, b) =>
+        (b.combinedScore ?? b.score) - (a.combinedScore ?? a.score) ||
+        a.student.public.college.localeCompare(b.student.public.college) ||
+        a.student.id.localeCompare(b.student.id),
+    );
+}
+
 export function safeIntroductionReasons(match: IntroductionMatch): string[] {
   const reasons: string[] = [
     `They study at ${match.student.public.college}, so this introduction expands beyond your campus.`,
@@ -73,6 +139,12 @@ export function safeIntroductionReasons(match: IntroductionMatch): string[] {
 
   if (match.scheduleOverlap) {
     reasons.push("Your schedules have overlap. Their private availability is not shown.");
+  }
+
+  if (match.usedLocalAI && (match.semanticSimilarity ?? 0) > 0.35) {
+    reasons.push(
+      "Your private description is semantically compatible with their matching profile. Neither private response is revealed.",
+    );
   }
 
   if (match.meetingCompatible) {

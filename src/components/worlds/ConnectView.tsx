@@ -1,12 +1,15 @@
-import { useMemo, useState } from "react";
+import { useState, type ChangeEvent } from "react";
 import {
   ArrowRight,
   Building2,
   Check,
+  Cpu,
   Laptop,
+  LoaderCircle,
   LockKeyhole,
   RefreshCw,
   ShieldCheck,
+  Sparkles,
   UserRoundSearch,
   Video,
 } from "lucide-react";
@@ -26,9 +29,12 @@ import {
 } from "@/data/network";
 import {
   rankIntroductions,
+  rankIntroductionsWithLocalAI,
   safeIntroductionReasons,
   suggestedVirtualWindows,
+  type IntroductionMatch,
 } from "@/lib/introductions";
+import { NetworkMap } from "./NetworkMap";
 
 const starterProfile: MyNetworkProfile = {
   firstName: "Michelle",
@@ -38,6 +44,11 @@ const starterProfile: MyNetworkProfile = {
   availability: ["Saturday afternoon", "Sunday afternoon"],
   meetPreference: "Either",
 };
+
+const starterIntent =
+  "I want to meet students at other colleges who like building things and would also be up for exploring off campus on weekends.";
+
+type AiStatus = "idle" | "loading" | "ready" | "fallback";
 
 function MultiSelect<T extends string>({
   options,
@@ -52,6 +63,7 @@ function MultiSelect<T extends string>({
     <div className="flex flex-wrap gap-2">
       {options.map((option) => {
         const active = selected.includes(option);
+
         return (
           <button
             key={option}
@@ -70,11 +82,16 @@ function MultiSelect<T extends string>({
 
 export function ConnectView() {
   const [profile, setProfile] = useState<MyNetworkProfile>(starterProfile);
+  const [privateIntent, setPrivateIntent] = useState(starterIntent);
+  const [matches, setMatches] = useState<IntroductionMatch[]>(() =>
+    rankIntroductions(starterProfile, NETWORK_STUDENTS),
+  );
   const [hasSearched, setHasSearched] = useState(false);
   const [matchIndex, setMatchIndex] = useState(0);
   const [requestState, setRequestState] = useState<"idle" | "intro" | "virtual">("idle");
+  const [aiStatus, setAiStatus] = useState<AiStatus>("idle");
+  const [aiError, setAiError] = useState("");
 
-  const matches = useMemo(() => rankIntroductions(profile, NETWORK_STUDENTS), [profile]);
   const current = matches[matchIndex] ?? null;
 
   const toggle = <
@@ -94,14 +111,39 @@ export function ConnectView() {
     });
   };
 
-  const search = () => {
+  const search = async () => {
     setHasSearched(true);
     setMatchIndex(0);
     setRequestState("idle");
+    setAiError("");
+
+    if (!privateIntent.trim()) {
+      setMatches(rankIntroductions(profile, NETWORK_STUDENTS));
+      setAiStatus("fallback");
+      return;
+    }
+
+    setAiStatus("loading");
+
+    try {
+      const ranked = await rankIntroductionsWithLocalAI(profile, NETWORK_STUDENTS, privateIntent);
+      setMatches(ranked);
+      setAiStatus("ready");
+    } catch (error) {
+      console.error("Local embedding model failed to load", error);
+      setMatches(rankIntroductions(profile, NETWORK_STUDENTS));
+      setAiStatus("fallback");
+      setAiError(
+        "The local model could not load, so this result is using the transparent rule-based matcher instead.",
+      );
+    }
   };
 
   const nextMatch = () => {
-    if (matches.length === 0) return;
+    if (matches.length === 0) {
+      return;
+    }
+
     setMatchIndex((index) => (index + 1) % matches.length);
     setRequestState("idle");
   };
@@ -113,11 +155,11 @@ export function ConnectView() {
           Connect across campuses
         </p>
         <h1 className="mt-3 font-sans text-3xl font-bold tracking-[-0.03em] sm:text-4xl">
-          Ask for an introduction. Do not browse a directory.
+          Describe who you want to meet. Keep the reasoning private.
         </h1>
         <p className="mt-3 text-sm leading-6 text-muted-foreground sm:text-base">
-          Worlds Together uses your preferences privately and reveals one relevant student at a
-          time. The prototype prioritizes people at other colleges.
+          A small language model runs in your browser to understand your free-text intent. Explicit
+          preferences still control availability, cross-campus fit, and meeting format.
         </p>
       </header>
 
@@ -137,7 +179,7 @@ export function ConnectView() {
                 id="college"
                 className="field"
                 value={profile.college}
-                onChange={(event) =>
+                onChange={(event: ChangeEvent<HTMLSelectElement>) =>
                   setProfile((previous) => ({
                     ...previous,
                     college: event.target.value as College,
@@ -150,6 +192,38 @@ export function ConnectView() {
                   </option>
                 ))}
               </select>
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-sm font-medium" htmlFor="private-intent">
+                In your own words, who would you like to meet?
+              </label>
+              <textarea
+                id="private-intent"
+                className="field min-h-28 resize-y"
+                value={privateIntent}
+                onChange={(event: ChangeEvent<HTMLTextAreaElement>) =>
+                  setPrivateIntent(event.target.value)
+                }
+                placeholder="For example: I want someone who likes building projects, is open to spontaneous weekend plans, and studies at another college."
+              />
+              <div className="flex items-start gap-2 text-xs leading-5 text-muted-foreground">
+                <LockKeyhole className="mt-0.5 size-3.5 shrink-0" />
+                This text is used for matching only. It is never displayed to another student.
+              </div>
+            </div>
+
+            <div className="rounded-xl border border-primary/20 bg-primary/7 p-4">
+              <div className="flex items-start gap-3">
+                <Cpu className="mt-0.5 size-4 shrink-0 text-primary" />
+                <div>
+                  <p className="text-sm font-medium">Local AI matching</p>
+                  <p className="mt-1 text-xs leading-5 text-muted-foreground">
+                    On first use, the browser downloads a small MiniLM embedding model. Your text is
+                    then processed on-device with no AI API key.
+                  </p>
+                </div>
+              </div>
             </div>
 
             <div className="space-y-2">
@@ -214,14 +288,25 @@ export function ConnectView() {
             <button
               className="btn-primary w-full"
               disabled={
+                aiStatus === "loading" ||
                 profile.interests.length === 0 ||
                 profile.goals.length === 0 ||
                 profile.availability.length === 0
               }
-              onClick={search}
+              onClick={() => void search()}
             >
-              Find one introduction
-              <ArrowRight className="size-4" />
+              {aiStatus === "loading" ? (
+                <>
+                  <LoaderCircle className="size-4 animate-spin" />
+                  Loading local model and ranking
+                </>
+              ) : (
+                <>
+                  <Sparkles className="size-4" />
+                  Find one introduction
+                  <ArrowRight className="size-4" />
+                </>
+              )}
             </button>
           </div>
         </section>
@@ -235,8 +320,8 @@ export function ConnectView() {
                   No profiles to swipe through
                 </h2>
                 <p className="mt-2 text-sm leading-6 text-muted-foreground">
-                  Set what you are looking for. Worlds Together will surface a single cross-campus
-                  introduction and explain why it may be useful.
+                  Describe what you need. Worlds Together combines semantic similarity with explicit
+                  privacy-aware matching rules and surfaces one cross-campus introduction.
                 </p>
               </div>
             </section>
@@ -245,9 +330,17 @@ export function ConnectView() {
               <section className="card-soft p-6 sm:p-8">
                 <div className="flex flex-wrap items-start justify-between gap-4">
                   <div>
-                    <p className="text-xs font-semibold uppercase tracking-[0.14em] text-primary">
-                      Suggested introduction
-                    </p>
+                    <div className="flex flex-wrap items-center gap-2">
+                      <p className="text-xs font-semibold uppercase tracking-[0.14em] text-primary">
+                        Suggested introduction
+                      </p>
+                      {aiStatus === "ready" && (
+                        <span className="inline-flex items-center gap-1 rounded-full border border-primary/20 bg-primary/7 px-2 py-1 text-[11px] font-medium text-primary">
+                          <Cpu className="size-3" />
+                          Local AI
+                        </span>
+                      )}
+                    </div>
                     <h2 className="mt-2 font-sans text-2xl font-bold tracking-tight">
                       {current.student.public.firstName}
                     </h2>
@@ -270,6 +363,26 @@ export function ConnectView() {
                   ))}
                 </div>
 
+                {current.usedLocalAI && current.semanticSimilarity !== undefined && (
+                  <div className="mt-6 rounded-xl border border-border bg-card p-4">
+                    <div className="flex items-center justify-between gap-4">
+                      <div>
+                        <p className="text-xs font-medium text-muted-foreground">
+                          Semantic compatibility
+                        </p>
+                        <p className="mt-1 text-sm font-semibold">
+                          {Math.round(current.semanticSimilarity * 100)}% model similarity
+                        </p>
+                      </div>
+                      <Sparkles className="size-5 text-primary" />
+                    </div>
+                    <p className="mt-2 text-xs leading-5 text-muted-foreground">
+                      This score comes from vector similarity between private matching descriptions.
+                      The text itself stays hidden.
+                    </p>
+                  </div>
+                )}
+
                 <div className="mt-7 rounded-xl border border-border bg-secondary/45 p-5">
                   <div className="flex items-center gap-2">
                     <ShieldCheck className="size-4 text-primary" />
@@ -289,6 +402,12 @@ export function ConnectView() {
                     ))}
                   </ul>
                 </div>
+
+                {aiError && (
+                  <p className="mt-4 rounded-xl border border-border bg-secondary/50 p-4 text-xs leading-5 text-muted-foreground">
+                    {aiError}
+                  </p>
+                )}
 
                 <div className="mt-6 flex flex-wrap gap-3">
                   <button className="btn-primary" onClick={() => setRequestState("intro")}>
@@ -338,9 +457,11 @@ export function ConnectView() {
                 )}
               </section>
 
+              <NetworkMap matches={matches} activeStudentId={current.student.id} />
+
               <p className="px-1 text-xs leading-5 text-muted-foreground">
-                Synthetic profile. The matching algorithm can use private goals and availability,
-                but the explanation only exposes information safe to reveal.
+                Synthetic profiles only. AI contributes semantic similarity, while explicit rules
+                still handle privacy, availability, and cross-campus constraints.
               </p>
             </>
           ) : (
